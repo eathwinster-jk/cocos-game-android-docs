@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cocos Game Android SDK 接入文档</title>
+  <style>
+    :root{color-scheme:light;--bg:#f5f7fb;--card:#fff;--text:#18202a;--muted:#657080;--brand:#087f6b;--line:#dfe5ec;--code:#111827}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}.hero{background:linear-gradient(135deg,#063c35,#0a806c);color:#fff;padding:56px 20px}.wrap{max-width:980px;margin:auto}.hero h1{margin:0 0 8px;font-size:34px}.hero p{margin:0;opacity:.86}.content{padding:28px 20px 72px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 8px 24px rgba(22,32,42,.05)}h2{margin:0 0 16px;font-size:25px}h3{margin:24px 0 10px;font-size:19px}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}pre{overflow:auto;background:var(--code);color:#e5edf7;border-radius:10px;padding:16px;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.download{display:block;padding:18px;border:1px solid var(--line);border-radius:12px;color:var(--text);text-decoration:none}.download strong{display:block;color:var(--brand);font-size:18px}.download span{color:var(--muted);font-size:14px}.tag{display:inline-block;background:#dff5ef;color:#076d5b;border-radius:99px;padding:2px 10px;margin:2px 6px 2px 0;font-size:13px}.note{border-left:4px solid var(--brand);background:#edf9f6;padding:12px 16px}.toc a{color:var(--brand);text-decoration:none;margin-right:14px}.muted{color:var(--muted)}@media(max-width:600px){.hero{padding:38px 18px}.hero h1{font-size:27px}.content{padding:18px 12px 52px}.card{padding:18px}}
+  </style>
+</head>
+<body>
+<header class="hero"><div class="wrap"><h1>Cocos Game Android SDK</h1><p>客户端接入、配置、运行与下载 · v0.1.0</p></div></header>
+<main class="content wrap">
+  <section class="card toc"><strong>目录：</strong><a href="#download">下载</a><a href="#aar">本地 AAR</a><a href="#gradle">Gradle</a><a href="#init">初始化</a><a href="#open">打开游戏</a><a href="#callback">回调</a><a href="#run">运行 Demo</a></section>
+  <section class="card" id="download"><h2>下载</h2><div class="grid">
+    <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.1.0/game-sdk-0.1.0.aar"><strong>下载 Android AAR</strong><span>game-sdk-0.1.0.aar · arm64-v8a</span></a>
+    <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.1.0/game-sdk-demo-0.1.0.apk"><strong>下载测试 Demo APK</strong><span>输入 UID、Token、Scene Type、Scene ID 后运行</span></a>
+  </div><p><span class="tag">compileSdk 35</span><span class="tag">minSdk 26</span><span class="tag">targetSdk 34</span><span class="tag">JDK 17</span><span class="tag">arm64-v8a</span></p></section>
+  <section class="card"><h2>接入前准备</h2><ul><li>宿主客户端完成用户登录并获得 <code>liveUserId</code>、<code>liveToken</code>。</li><li>宿主动态传入 <code>sceneType</code>：1 直播间，2 IM 群。</li><li>宿主动态传入 <code>sceneId</code>，SDK 不内置固定场景。</li><li>正式环境必须使用 HTTPS/WSS。</li></ul></section>
+  <section class="card" id="aar"><h2>模式一：本地 AAR 接入</h2><h3>1. 复制文件</h3><pre><code>app/libs/game-sdk-0.1.0.aar</code></pre><h3>2. Gradle Groovy</h3><pre><code>android {
+    compileSdkVersion 35
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 34
+        ndk { abiFilters "arm64-v8a" }
+    }
+    packagingOptions { jniLibs { useLegacyPackaging true } }
+}
+dependencies {
+    implementation files("libs/game-sdk-0.1.0.aar")
+}</code></pre><h3>3. Kotlin DSL</h3><pre><code>android {
+    compileSdk = 35
+    defaultConfig {
+        minSdk = 26
+        targetSdk = 34
+        ndk { abiFilters += "arm64-v8a" }
+    }
+    packaging { jniLibs { useLegacyPackaging = true } }
+}
+dependencies {
+    implementation(files("libs/game-sdk-0.1.0.aar"))
+}</code></pre></section>
+  <section class="card" id="gradle"><h2>模式二：Gradle 远程接入（推荐）</h2><h3>1. settings.gradle.kts</h3><pre><code>dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://raw.githubusercontent.com/eathwinster-jk/cocos-game-android-sdk/main/repository")
+        }
+    }
+}</code></pre><h3>2. app/build.gradle.kts</h3><pre><code>dependencies {
+    implementation("com.eath.cocosgamesdk:game-sdk:0.1.0")
+}</code></pre><p class="note">请固定版本号，不使用 <code>+</code> 或 latest 动态依赖。</p></section>
+  <section class="card"><h2>权限与混淆</h2><p>AAR 已合并 INTERNET、ACCESS_NETWORK_STATE、VIBRATE 权限和游戏 Activity。</p><pre><code>-keep class com.eath.cocosgamesdk.** { *; }
+-keep class com.cocos.lib.** { *; }
+-dontwarn com.cocos.lib.**</code></pre></section>
+  <section class="card" id="init"><h2>初始化 SDK</h2><p>在主进程 Application 中只初始化一次，且早于其他 SDK 调用。</p><h3>Java</h3><pre><code>public final class App extends Application {
+    @Override public void onCreate() {
+        super.onCreate();
+        CocosGameSDK.getInstance().initialize(this);
+    }
+}</code></pre><h3>Kotlin</h3><pre><code>class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        CocosGameSDK.getInstance().initialize(this)
+    }
+}</code></pre></section>
+  <section class="card" id="open"><h2>创建会话并打开游戏</h2><h3>Java</h3><pre><code>GameSessionConfig session = new GameSessionConfig(
+    websocketUrl,
+    apiBaseUrl,
+    liveUserId,
+    liveToken,
+    sceneType,
+    sceneId,
+    0,
+    BuildConfig.VERSION_NAME,
+    "Android"
+);
+CocosGameSDK.getInstance().openGame(this, "niuniu", session);</code></pre><h3>Kotlin</h3><pre><code>val session = GameSessionConfig(
+    websocketUrl,
+    apiBaseUrl,
+    liveUserId,
+    liveToken,
+    sceneType,
+    sceneId,
+    0,
+    BuildConfig.VERSION_NAME,
+    "Android",
+)
+CocosGameSDK.getInstance().openGame(this, "niuniu", session)</code></pre><p class="note">UID、Token、Scene Type、Scene ID 必须由宿主客户端传入，不能固定写在 SDK 中。</p></section>
+  <section class="card" id="callback"><h2>会话失效与公共事件</h2><h3>会话失效</h3><pre><code>if (requestCode == CocosGameSDK.GAME_REQUEST_CODE
+        &amp;&amp; resultCode == Activity.RESULT_CANCELED
+        &amp;&amp; data != null
+        &amp;&amp; data.hasExtra(CocosGameActivity.EXTRA_SESSION_ERROR)) {
+    clearLoginSession();
+    openLoginPage();
+}</code></pre><h3>Java 公共事件</h3><pre><code>CocosGameSDK.getInstance().setHostListener(
+    (gameId, event, payloadJson) -&gt; {
+        if ("wallet.open".equals(event)) openWalletPage();
+    }
+);
+CocosGameSDK.getInstance().sendGameEvent(
+    "wallet.closed",
+    "{\"isBalanceChanged\":true}"
+);</code></pre><h3>Kotlin 公共事件</h3><pre><code>CocosGameSDK.getInstance().setHostListener { gameId, event, payloadJson -&gt;
+    if (event == "wallet.open") openWalletPage()
+}
+CocosGameSDK.getInstance().sendGameEvent(
+    "wallet.closed",
+    """{"isBalanceChanged":true}""",
+)</code></pre></section>
+  <section class="card" id="run"><h2>运行测试 Demo</h2><ol><li>下载上方 Demo APK，安装到 API 26 以上的 ARM64 设备；或访问私有 Demo 源码仓库构建。</li><li>输入 Live User ID、Live Token。</li><li>输入 Scene Type：1 直播间，2 IM 群。</li><li>输入当前 Scene ID。</li><li>点击“打开游戏”。</li></ol><pre><code>adb install -r game-sdk-demo-0.1.0.apk</code></pre></section>
+  <section class="card"><h2>常见问题</h2><h3>Gradle 无法下载</h3><p>确认可访问 <code>raw.githubusercontent.com</code>，然后执行 <code>./gradlew --refresh-dependencies</code>。</p><h3>x86 模拟器不能运行</h3><p>当前 SDK 仅包含 arm64-v8a，请使用 ARM 模拟器或 ARM64 真机。</p><h3>会话认证失败</h3><p>确认 UID 与 Token 匹配、未过期，HTTP 与 WebSocket 属于同一环境。</p><h3>找不到桌台</h3><p>确认 Scene Type、Scene ID 以及后台开桌场景完全一致。</p></section>
+  <p class="muted">SDK v0.1.0 · 页面仅包含客户端接入信息，不包含业务源码。</p>
+</main>
+</body>
+</html>
