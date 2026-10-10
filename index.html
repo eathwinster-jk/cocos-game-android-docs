@@ -17,7 +17,17 @@
     <a class="download" href="https://tinyurl.com/2ywxvsql"><strong>下载测试 Demo APK</strong><span>支持账号密码或 UID Token 两种登录模式</span></a>
   </div><p><span class="tag">compileSdk 35</span><span class="tag">minSdk 26</span><span class="tag">targetSdk 34</span><span class="tag">JDK 17</span><span class="tag">arm64-v8a</span></p></section>
   <section class="card"><h2>接入前准备</h2><ul><li>宿主客户端完成用户登录并获得 <code>liveUserId</code>、<code>liveToken</code>。</li><li>宿主动态传入 <code>sceneType</code>：1 直播间，2 IM 群。</li><li>宿主动态传入 <code>sceneId</code>，SDK 不内置固定场景。</li><li>正式环境必须使用 HTTPS/WSS。</li></ul></section>
-  <section class="card" id="quickstart"><h2>5 分钟快速接入</h2><ol><li>在 <code>settings.gradle.kts</code> 添加 GitHub Maven 仓库。</li><li>在 App 模块添加 <code>game-sdk:0.1.0</code>。</li><li>在主进程 <code>Application</code> 初始化 SDK。</li><li>客户端登录后创建 <code>GameSessionConfig</code>。</li><li>调用 <code>openGame(activity, "niuniu", session)</code>。</li></ol><pre><code>maven {\n    url = uri(\"https://raw.githubusercontent.com/eathwinster-jk/cocos-game-android-sdk/main/repository\")\n}\n\nimplementation(\"com.eath.cocosgamesdk:game-sdk:0.1.0\")</code></pre><pre><code>CocosGameSDK.getInstance().initialize(applicationContext)\n\nval session = GameSessionConfig(\n    websocketUrl, apiBaseUrl, liveUserId, liveToken,\n    sceneType, sceneId, 0, BuildConfig.VERSION_NAME, \"Android\"\n)\nCocosGameSDK.getInstance().openGame(activity, \"niuniu\", session)</code></pre><p class="warn">SDK 不提供生产登录。UID、Token、Scene Type、Scene ID 必须由宿主客户端传入。</p></section>
+  <section class="card" id="quickstart"><h2>5 分钟快速接入</h2><ol><li>在 <code>settings.gradle.kts</code> 添加 GitHub Maven 仓库。</li><li>在 App 模块添加 <code>game-sdk:0.1.0</code>。</li><li>在主进程 <code>Application</code> 初始化 SDK。</li><li>客户端登录后创建 <code>GameSessionConfig</code>。</li><li>调用 <code>openGame(activity, "niuniu", session)</code>。</li></ol><pre><code>maven {
+    url = uri("https://raw.githubusercontent.com/eathwinster-jk/cocos-game-android-sdk/main/repository")
+}
+
+implementation("com.eath.cocosgamesdk:game-sdk:0.1.0")</code></pre><pre><code>CocosGameSDK.getInstance().initialize(applicationContext)
+
+val session = GameSessionConfig(
+    websocketUrl, apiBaseUrl, liveUserId, liveToken,
+    sceneType, sceneId, 0, BuildConfig.VERSION_NAME, "Android"
+)
+CocosGameSDK.getInstance().openGame(activity, "niuniu", session)</code></pre><p class="warn">SDK 不提供生产登录。UID、Token、Scene Type、Scene ID 必须由宿主客户端传入。</p></section>
   <section class="card" id="aar"><h2>模式一：本地 AAR 接入</h2><h3>1. 复制文件</h3><pre><code>app/libs/game-sdk-0.1.0.aar</code></pre><h3>2. Gradle Groovy</h3><pre><code>android {
     compileSdkVersion 35
     defaultConfig {
