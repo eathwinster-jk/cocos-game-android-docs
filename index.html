@@ -14,7 +14,7 @@
   <section class="card toc"><strong>目录：</strong><a href="#download">下载</a><a href="#aar">本地 AAR</a><a href="#gradle">Gradle</a><a href="#init">初始化</a><a href="#open">打开游戏</a><a href="#callback">回调</a><a href="#run">运行 Demo</a></section>
   <section class="card" id="download"><h2>下载</h2><div class="grid">
     <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.1.0/game-sdk-0.1.0.aar"><strong>下载 Android AAR</strong><span>game-sdk-0.1.0.aar · arm64-v8a</span></a>
-    <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.1.0/game-sdk-demo-0.1.0.apk"><strong>下载测试 Demo APK</strong><span>输入 UID、Token、Scene Type、Scene ID 后运行</span></a>
+    <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.1.0/game-sdk-demo-0.1.0.apk"><strong>下载测试 Demo APK</strong><span>支持账号密码或 UID Token 两种登录模式</span></a>
   </div><p><span class="tag">compileSdk 35</span><span class="tag">minSdk 26</span><span class="tag">targetSdk 34</span><span class="tag">JDK 17</span><span class="tag">arm64-v8a</span></p></section>
   <section class="card"><h2>接入前准备</h2><ul><li>宿主客户端完成用户登录并获得 <code>liveUserId</code>、<code>liveToken</code>。</li><li>宿主动态传入 <code>sceneType</code>：1 直播间，2 IM 群。</li><li>宿主动态传入 <code>sceneId</code>，SDK 不内置固定场景。</li><li>正式环境必须使用 HTTPS/WSS。</li></ul></section>
   <section class="card" id="aar"><h2>模式一：本地 AAR 接入</h2><h3>1. 复制文件</h3><pre><code>app/libs/game-sdk-0.1.0.aar</code></pre><h3>2. Gradle Groovy</h3><pre><code>android {
@@ -109,7 +109,7 @@ CocosGameSDK.getInstance().sendGameEvent(
     "wallet.closed",
     """{"isBalanceChanged":true}""",
 )</code></pre></section>
-  <section class="card" id="run"><h2>运行测试 Demo</h2><ol><li>下载上方 Demo APK，安装到 API 26 以上的 ARM64 设备；或访问私有 Demo 源码仓库构建。</li><li>输入 Live User ID、Live Token。</li><li>输入 Scene Type：1 直播间，2 IM 群。</li><li>输入当前 Scene ID。</li><li>点击“打开游戏”。</li></ol><pre><code>adb install -r game-sdk-demo-0.1.0.apk</code></pre></section>
+  <section class="card" id="run"><h2>运行测试 Demo</h2><p>源码：<a href="https://github.com/eathwinster-jk/cocos-game-android-demo">cocos-game-android-demo</a></p><ol><li>下载上方 Demo APK，安装到 API 26 以上的 ARM64 设备；或克隆源码构建。</li><li>输入 Scene Type：1 直播间，2 IM 群。</li><li>输入当前 Scene ID。</li><li>选择账号密码登录，或输入 Live User ID、Live Token。</li><li>点击对应按钮打开游戏。</li></ol><pre><code>adb install -r game-sdk-demo-0.1.0.apk</code></pre></section>
   <section class="card"><h2>常见问题</h2><h3>Gradle 无法下载</h3><p>确认可访问 <code>raw.githubusercontent.com</code>，然后执行 <code>./gradlew --refresh-dependencies</code>。</p><h3>x86 模拟器不能运行</h3><p>当前 SDK 仅包含 arm64-v8a，请使用 ARM 模拟器或 ARM64 真机。</p><h3>会话认证失败</h3><p>确认 UID 与 Token 匹配、未过期，HTTP 与 WebSocket 属于同一环境。</p><h3>找不到桌台</h3><p>确认 Scene Type、Scene ID 以及后台开桌场景完全一致。</p></section>
   <p class="muted">SDK v0.1.0 · 页面仅包含客户端接入信息，不包含业务源码。</p>
 </main>
