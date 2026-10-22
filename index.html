@@ -9,26 +9,26 @@
   </style>
 </head>
 <body>
-<header class="hero"><div class="wrap"><h1>Cocos Game Android SDK</h1><p>客户端接入、配置、运行与下载 · v0.1.6</p></div></header>
+<header class="hero"><div class="wrap"><h1>Cocos Game Android SDK</h1><p>客户端接入、配置、运行与下载 · v0.1.7</p></div></header>
 <main class="content wrap">
   <section class="card toc"><strong>目录：</strong><a href="#download">下载</a><a href="#quickstart">快速开始</a><a href="#aar">本地 AAR</a><a href="#gradle">Gradle</a><a href="#init">初始化</a><a href="#open">打开游戏</a><a href="#callback">回调</a><a href="#api">API</a><a href="#records">我的记录</a><a href="#update">热更新</a><a href="#run">Demo</a><a href="#checklist">验收</a></section>
   <section class="card" id="download"><h2>下载</h2><div class="grid">
-    <a class="download" href="https://tinyurl.com/2dd2su7e"><strong>下载 Android AAR</strong><span>game-sdk-0.1.6.aar · arm64-v8a · SHA-256 7e1876…140a</span></a>
-    <a class="download" href="https://tinyurl.com/22csrjul"><strong>下载测试 Demo APK</strong><span>支持账号密码或 UID Token 两种登录模式</span></a>
-  </div><p><span class="tag">compileSdk 35</span><span class="tag">minSdk 26</span><span class="tag">targetSdk 34</span><span class="tag">JDK 17</span><span class="tag">arm64-v8a</span></p><p>v0.1.6 体验优化与问题修复：牛牛牌桌按设计稿重做 UI，高清屏下背景、头像、图标与文字更清晰；移动端限制 30 帧降低发热；「我的记录」历史场次适配新版注单接口，场次净输赢改为扣除抽成后金额并与顶部汇总一致，支持按局号搜索。公共 API 无变更，宿主只需升级依赖版本。</p><p>v0.1.5 问题修复：本人座位身份以后台座位数据为准；修复已入座仍提示「立即加入」、下注提示观战下注，以及入座成功后界面仍显示失败的问题。公共 API 无变更，宿主只需升级依赖版本，<code>imUserId</code> 仍需传正确值。</p><p>v0.1.4 兼容更新：「我的记录」接入后台注单查询，支持当前本桌 / 历史场次、筛选、周期切换与滑到底部自动分页；修复小屏下顶部手牌遮挡昵称。公共 API 无变更，宿主只需升级依赖版本。</p><p>v0.1.3 不兼容变更：<code>GameSessionConfig</code> 在 <code>liveUserId</code> 后新增必填参数 <code>imUserId</code>（登录响应 <code>userinfo.imUserId</code>），用于识别本人座位；每局结算后自动刷新余额。宿主升级后需补传该参数。</p></section>
+    <a class="download" href="https://tinyurl.com/2y6mgloh"><strong>下载 Android AAR</strong><span>game-sdk-0.1.7.aar · arm64-v8a · SHA-256 cf62d3…1589</span></a>
+    <a class="download" href="https://tinyurl.com/28mk5n3q"><strong>下载测试 Demo APK</strong><span>支持账号密码或 UID Token 两种登录模式</span></a>
+  </div><p><span class="tag">compileSdk 35</span><span class="tag">minSdk 26</span><span class="tag">targetSdk 34</span><span class="tag">JDK 17</span><span class="tag">arm64-v8a</span></p><p>v0.1.7 问题修复：修复顶部返回或系统返回键退出牌桌后仍占座并继续自动参局的问题，在座且不可离座时隐藏返回入口，可离座时先离座再关闭牌桌；「我的记录」历史场次支持按局号服务端搜索（最近 31 天，查不到时按桌号查询）。公共 API 无变更，宿主只需升级依赖版本。</p><p>v0.1.6 体验优化与问题修复：牛牛牌桌按设计稿重做 UI，高清屏下背景、头像、图标与文字更清晰；移动端限制 30 帧降低发热；「我的记录」历史场次适配新版注单接口，场次净输赢改为扣除抽成后金额并与顶部汇总一致，支持按局号搜索。公共 API 无变更，宿主只需升级依赖版本。</p><p>v0.1.5 问题修复：本人座位身份以后台座位数据为准；修复已入座仍提示「立即加入」、下注提示观战下注，以及入座成功后界面仍显示失败的问题。公共 API 无变更，宿主只需升级依赖版本，<code>imUserId</code> 仍需传正确值。</p><p>v0.1.4 兼容更新：「我的记录」接入后台注单查询，支持当前本桌 / 历史场次、筛选、周期切换与滑到底部自动分页；修复小屏下顶部手牌遮挡昵称。公共 API 无变更，宿主只需升级依赖版本。</p><p>v0.1.3 不兼容变更：<code>GameSessionConfig</code> 在 <code>liveUserId</code> 后新增必填参数 <code>imUserId</code>（登录响应 <code>userinfo.imUserId</code>），用于识别本人座位；每局结算后自动刷新余额。宿主升级后需补传该参数。</p></section>
   <section class="card"><h2>接入前准备</h2><ul><li>宿主客户端完成用户登录并获得 <code>liveUserId</code>、<code>imUserId</code>、<code>liveToken</code>。</li><li>宿主动态传入 <code>sceneType</code>：1 直播间，2 IM 群。</li><li>宿主动态传入 <code>sceneId</code>，SDK 不内置固定场景。</li><li>正式环境必须使用 HTTPS/WSS。</li></ul></section>
-  <section class="card" id="quickstart"><h2>5 分钟快速接入</h2><ol><li>在 <code>settings.gradle.kts</code> 添加 GitHub Maven 仓库。</li><li>在 App 模块添加 <code>game-sdk:0.1.6</code>。</li><li>在主进程 <code>Application</code> 初始化 SDK。</li><li>客户端登录后创建 <code>GameSessionConfig</code>。</li><li>调用 <code>openGame(activity, "niuniu", session)</code>。</li></ol><pre><code>maven {
+  <section class="card" id="quickstart"><h2>5 分钟快速接入</h2><ol><li>在 <code>settings.gradle.kts</code> 添加 GitHub Maven 仓库。</li><li>在 App 模块添加 <code>game-sdk:0.1.7</code>。</li><li>在主进程 <code>Application</code> 初始化 SDK。</li><li>客户端登录后创建 <code>GameSessionConfig</code>。</li><li>调用 <code>openGame(activity, "niuniu", session)</code>。</li></ol><pre><code>maven {
     url = uri("https://raw.githubusercontent.com/eathwinster-jk/cocos-game-android-sdk/main/repository")
 }
 
-implementation("com.eath.cocosgamesdk:game-sdk:0.1.6")</code></pre><pre><code>CocosGameSDK.getInstance().initialize(applicationContext)
+implementation("com.eath.cocosgamesdk:game-sdk:0.1.7")</code></pre><pre><code>CocosGameSDK.getInstance().initialize(applicationContext)
 
 val session = GameSessionConfig(
     websocketUrl, apiBaseUrl, liveUserId, imUserId, liveToken,
     sceneType, sceneId, 0, BuildConfig.VERSION_NAME, "Android"
 )
 CocosGameSDK.getInstance().openGame(activity, "niuniu", session)</code></pre><p class="warn">SDK 不提供生产登录。UID、Token、Scene Type、Scene ID 必须由宿主客户端传入。</p></section>
-  <section class="card" id="aar"><h2>模式一：本地 AAR 接入</h2><h3>1. 复制文件</h3><pre><code>app/libs/game-sdk-0.1.6.aar</code></pre><h3>2. Gradle Groovy</h3><pre><code>android {
+  <section class="card" id="aar"><h2>模式一：本地 AAR 接入</h2><h3>1. 复制文件</h3><pre><code>app/libs/game-sdk-0.1.7.aar</code></pre><h3>2. Gradle Groovy</h3><pre><code>android {
     compileSdkVersion 35
     defaultConfig {
         minSdkVersion 26
@@ -38,7 +38,7 @@ CocosGameSDK.getInstance().openGame(activity, "niuniu", session)</code></pre><p 
     packagingOptions { jniLibs { useLegacyPackaging true } }
 }
 dependencies {
-    implementation files("libs/game-sdk-0.1.6.aar")
+    implementation files("libs/game-sdk-0.1.7.aar")
 }</code></pre><h3>3. Kotlin DSL</h3><pre><code>android {
     compileSdk = 35
     defaultConfig {
@@ -49,7 +49,7 @@ dependencies {
     packaging { jniLibs { useLegacyPackaging = true } }
 }
 dependencies {
-    implementation(files("libs/game-sdk-0.1.6.aar"))
+    implementation(files("libs/game-sdk-0.1.7.aar"))
 }</code></pre></section>
   <section class="card" id="gradle"><h2>模式二：Gradle 远程接入（推荐）</h2><h3>1. Kotlin DSL：settings.gradle.kts</h3><pre><code>dependencyResolutionManagement {
     repositories {
@@ -60,7 +60,7 @@ dependencies {
         }
     }
 }</code></pre><h3>2. Kotlin DSL：app/build.gradle.kts</h3><pre><code>dependencies {
-    implementation("com.eath.cocosgamesdk:game-sdk:0.1.6")
+    implementation("com.eath.cocosgamesdk:game-sdk:0.1.7")
 }</code></pre><h3>3. Groovy：settings.gradle</h3><pre><code>dependencyResolutionManagement {
     repositories {
         google()
@@ -70,7 +70,7 @@ dependencies {
         }
     }
 }</code></pre><h3>4. Groovy：app/build.gradle</h3><pre><code>dependencies {
-    implementation "com.eath.cocosgamesdk:game-sdk:0.1.6"
+    implementation "com.eath.cocosgamesdk:game-sdk:0.1.7"
 }</code></pre><p class="note">请固定版本号，不使用 <code>+</code> 或 latest 动态依赖。升级前应完成回归测试。</p></section>
   <section class="card"><h2>权限与混淆</h2><p>AAR 已合并 INTERNET、ACCESS_NETWORK_STATE、VIBRATE 权限和游戏 Activity。</p><pre><code>-keep class com.eath.cocosgamesdk.** { *; }
 -keep class com.cocos.lib.** { *; }
@@ -146,10 +146,10 @@ CocosGameSDK.getInstance().initialize(applicationContext, updateConfig);
 CocosGameSDK.getInstance().setUpdateListener(updateListener);</code></pre><table><thead><tr><th>状态</th><th>说明</th></tr></thead><tbody><tr><td>checking</td><td>检查目录与兼容版本</td></tr><tr><td>downloading</td><td>下载独立游戏模块</td></tr><tr><td>verifying</td><td>校验签名与 SHA-256</td></tr><tr><td>installing</td><td>安装并原子切换版本</td></tr><tr><td>ready</td><td>模块可启动</td></tr><tr><td>rollback</td><td>启动失败，回滚稳定版本</td></tr><tr><td>failed</td><td>更新失败</td></tr></tbody></table><p class="note">不启用远程更新时只调用 <code>initialize(context)</code>。</p></section>
   <section class="card"><h2>生命周期、旋转与弹窗</h2><ul><li>进入后台时 SDK 暂停音频和实时连接；回前台重新同步权威桌态。</li><li>旋转按钮只向客户端发请求，是否旋转由客户端决定。</li><li>客户端完成布局后回传实际游戏容器宽高，游戏只负责界面适配。</li><li>SDK 内置退出确认和下注卡；钱包、充值等业务页面通过公共事件接入。</li><li>规则弹窗关闭、大屏切小屏后应继续验证全部按钮可点击。</li></ul></section>
   <section class="card" id="records"><h2>我的记录接入</h2><p>「我的记录」由 SDK 内置实现，<strong>客户端无需调用任何新 API、无需注册回调</strong>，升级到 v0.1.4 及以上即可使用。用户在游戏内点击「规则」按钮，切换到「我的记录」页签即可查看本人注单，页面以原生弹窗展示。</p><h3>工作方式</h3><ul><li>SDK 使用 <code>GameSessionConfig</code> 中的 <code>apiBaseUrl</code>、<code>liveUserId</code>、<code>liveToken</code> 直接请求后台，请求头与入座、下注接口相同（<code>live-user-id</code>、<code>live-user-token</code>）。</li><li>当前本桌：<code>POST /api/lobby/bet/table/mine</code>，按当前桌号查询，游标分页。</li><li>历史场次：<code>POST /api/lobby/bet/history</code>，按下注日期区间查询，游标分页。</li><li>每页 20 条，列表滑到底部自动加载下一页；加载失败显示点击重试，无数据显示空状态。</li><li>顶部场景标签取自 <code>sceneType</code>、<code>sceneId</code> 和实际进入的桌号。</li></ul><h3>页面功能</h3><table><thead><tr><th>页签</th><th>功能</th></tr></thead><tbody><tr><td>当前本桌</td><td>本桌完成局数、本人赢/输、本人净输赢；全部 / 在座下注 / 观战跟注筛选</td></tr><tr><td>历史场次</td><td>最近 30 天 / 最近 7 天 / 今天；桌号、局号搜索；按桌台和日期分组，净输赢为扣除抽成后金额；顶部展示区间完成局数、赢/输与净输赢</td></tr></tbody></table><h3>客户端需确认</h3><ul><li><code>apiBaseUrl</code> 指向的大厅网关已开放上述两个接口，且与入座、下注使用同一环境。</li><li><code>liveToken</code> 在游戏期间保持有效；Token 失效时记录页显示加载失败，点击可重试。</li><li>记录只展示当前登录用户本人的注单，不涉及其他用户数据。</li></ul></section>
-  <section class="card" id="run"><h2>运行测试 Demo</h2><p>源码：<a href="https://github.com/eathwinster-jk/cocos-game-android-demo">cocos-game-android-demo</a></p><ol><li>下载上方 Demo APK，安装到 API 26 以上的 ARM64 设备；或克隆源码构建。</li><li>输入 Scene Type：1 直播间，2 IM 群。</li><li>输入当前 Scene ID。</li><li>选择账号密码登录，或输入 Live User ID、IM User ID、Live Token。</li><li>点击对应按钮打开游戏。</li></ol><pre><code>adb install -r game-sdk-demo-0.1.6.apk</code></pre></section>
+  <section class="card" id="run"><h2>运行测试 Demo</h2><p>源码：<a href="https://github.com/eathwinster-jk/cocos-game-android-demo">cocos-game-android-demo</a></p><ol><li>下载上方 Demo APK，安装到 API 26 以上的 ARM64 设备；或克隆源码构建。</li><li>输入 Scene Type：1 直播间，2 IM 群。</li><li>输入当前 Scene ID。</li><li>选择账号密码登录，或输入 Live User ID、IM User ID、Live Token。</li><li>点击对应按钮打开游戏。</li></ol><pre><code>adb install -r game-sdk-demo-0.1.7.apk</code></pre></section>
   <section class="card"><h2>常见问题</h2><h3>Gradle 无法下载</h3><p>确认可访问 <code>raw.githubusercontent.com</code>，然后执行 <code>./gradlew --refresh-dependencies</code>。</p><h3>x86 模拟器不能运行</h3><p>当前 SDK 仅包含 arm64-v8a，请使用 ARM 模拟器或 ARM64 真机。</p><h3>提示 sessionConfig 不能为空</h3><p>SDK 不允许无会话启动。客户端必须先传入 UID、Token、Scene Type、Scene ID。</p><h3>会话认证失败</h3><p>确认 UID 与 Token 匹配、未过期，HTTP 与 WebSocket 属于同一环境。</p><h3>我的记录加载失败或为空</h3><p>确认大厅网关已开放 <code>/api/lobby/bet/table/mine</code> 与 <code>/api/lobby/bet/history</code>，Token 未过期；当前本桌需先成功进入桌台，历史场次可切换为最近 30 天查看。</p><h3>找不到桌台</h3><p>确认 Scene Type、Scene ID 以及后台开桌场景完全一致。</p><h3>AAR 冲突或找不到 native 库</h3><p>确认仅保留一个 SDK 版本、启用 arm64-v8a，并检查 APK 中存在 <code>lib/arm64-v8a/libcocos.so</code>。</p></section>
   <section class="card" id="checklist"><h2>上线验收清单</h2><ul><li>SDK 仅在主进程初始化一次。</li><li>UID、Token、Scene Type、Scene ID 均来自客户端。</li><li>API 26、API 34 和主流设备构建运行通过。</li><li>账号密码与 UID Token Demo 均能进入游戏。</li><li>入座、离座、下注和结算正常。</li><li>结算金额与后端 <code>seatSettlements.netCent</code> 一致。</li><li>规则弹窗关闭后按钮仍可点击。</li><li>「我的记录」当前本桌、历史场次均能加载，筛选、周期切换与滑到底部分页正常。</li><li>大屏、小屏往返后全部按钮仍可点击。</li><li>进入后台再返回能够恢复桌态。</li><li>Token 失效后能返回客户端登录流程。</li><li>Release 混淆后反射桥正常。</li><li>未记录 Token、密码或完整敏感响应。</li></ul></section>
-  <p class="muted">SDK v0.1.6 · 页面仅包含客户端接入信息，不包含业务源码。</p>
+  <p class="muted">SDK v0.1.7 · 页面仅包含客户端接入信息，不包含业务源码。</p>
 </main>
 </body>
 </html>
