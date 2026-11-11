@@ -11,7 +11,7 @@
 <body>
 <header class="hero"><div class="wrap"><h1>Cocos Game Android SDK</h1><p>客户端接入、配置、运行与下载 · v0.6.13</p></div></header>
 <main class="content wrap">
-  <section class="card toc"><strong>目录：</strong><a href="#download">下载</a><a href="#quickstart">快速开始</a><a href="#aar">本地 AAR</a><a href="#gradle">Gradle</a><a href="#init">初始化</a><a href="#open">打开游戏</a><a href="#callback">回调</a><a href="#bottom">下方内容</a><a href="#mini">迷你条</a><a href="#preload">预加载</a><a href="#embed">嵌入页面</a><a href="#host-ui">竖屏宿主实现</a><a href="#guest">游客观战</a><a href="#api">API</a><a href="#records">我的记录</a><a href="#update">热更新</a><a href="#run">Demo</a><a href="#checklist">验收</a></section>
+  <section class="card toc"><strong>目录：</strong><a href="#download">下载</a><a href="#quickstart">快速开始</a><a href="#aar">本地 AAR</a><a href="#gradle">Gradle</a><a href="#init">初始化</a><a href="#open">打开游戏</a><a href="#callback">回调</a><a href="#bottom">下方内容</a><a href="#mini">迷你条</a><a href="#preload">预加载</a><a href="#embed">嵌入页面</a><a href="#bet-ui">竖屏下注弹窗</a><a href="#host-ui">竖屏宿主实现</a><a href="#guest">游客观战</a><a href="#api">API</a><a href="#records">我的记录</a><a href="#update">热更新</a><a href="#run">Demo</a><a href="#checklist">验收</a></section>
   <section class="card" id="download"><h2>下载</h2><div class="grid">
     <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.6.13/game-sdk-0.6.13.aar"><strong>下载 Android AAR</strong><span>game-sdk-0.6.13.aar · arm64-v8a · SHA-256 250af3…e268</span></a>
     <a class="download" href="https://github.com/eathwinster-jk/cocos-game-android-docs/releases/download/v0.6.13/game-sdk-demo-0.6.13.apk"><strong>下载测试 Demo APK</strong><span>支持账号密码、UID Token 登录与游客观战</span></a>
@@ -253,12 +253,79 @@ override fun onBackPressed() {
     if (CocosGameSDK.getInstance().onBackPressed()) return
     super.onBackPressed()
 }</code></pre></section>
-  <section class="card" id="host-ui"><h2>竖屏界面由宿主实现</h2><p>竖屏下的下注、记录与规则、退出确认都可以由宿主自绘；注册对应监听后竖屏 SDK 不再展示这些界面，全屏仍由 SDK 展示。未注册的监听仍使用 SDK 自带界面。独立游戏页与嵌入模式均适用。</p><table><thead><tr><th>界面</th><th>监听</th><th>宿主调用</th></tr></thead><tbody><tr><td>下注</td><td><code>setBetListener</code>：<code>onBetOptions</code>（注区、筹码、截止时间）、<code>onBetClosed</code>、<code>onBetResult</code></td><td><code>submitBet(roundId, areaCode, amountCent, clientBetNo)</code></td></tr><tr><td>记录与规则</td><td><code>setRecordsListener</code>：<code>onShowRecords</code>、<code>onRecordsUpdated</code></td><td><code>queryRecords(isHistory, filterKey, periodIndex, keyword)</code>、<code>loadMoreRecords(isHistory)</code>、<code>refreshRecords(isHistory)</code>（0.6.7）</td></tr><tr><td>退出确认</td><td><code>setExitListener</code>：<code>onExitRequested</code></td><td><code>GameExitDecision.leave()</code> / <code>stay()</code></td></tr></tbody></table><ul><li><code>submitBet</code> 须在主线程调用；<code>clientBetNo</code> 为幂等号（不超过 64 个字符，可用 <code>CocosGameSDK.createClientBetNo()</code> 生成），同一幂等号在结果返回前或成功后再次提交会被忽略，失败后可用原幂等号重试；本局已截止、游戏未打开或幂等号重复时返回 false。</li><li>记录查询：<code>isHistory</code> 为 false 查本桌当前记录，<code>filterKey</code> 取 <code>records.filters[].key</code>（全部为 <code>all</code>）；为 true 查历史场次，<code>periodIndex</code> 取周期下标，<code>keyword</code> 为局号或桌号。</li><li>退出确认必须调用 <code>leave()</code> 或 <code>stay()</code> 之一，只有第一次生效；游戏只允许在两局之间离座。</li><li>示例见 Demo 源码 <code>DemoHostBetPanel</code>、<code>DemoHostRecordsSheet</code>、<code>DemoBottomContentProvider</code>。</li></ul><h3>加注卡片放入宿主容器（0.6.12）</h3><p>不想自绘、又想自己决定加注卡片的位置时，可以把 SDK 自带加注卡片放进宿主提供的容器。仅在未注册 <code>setBetListener</code> 时生效；全屏横屏仍由游戏内弹层展示。</p><ul><li>须在主线程调用，建议在 <code>openGame</code> 前后设置；SDK 只弱引用容器，页面销毁后自动失效。</li><li>卡片以 MATCH_PARENT 宽、WRAP_CONTENT 高加入容器，外边距与背景由宿主容器决定；容器高度建议用 wrap_content，卡片收起（GONE）时容器随之收回。</li><li>传 null 恢复默认位置（紧贴游戏容器下方）。</li></ul><pre><code>// Java：binding.betContainer 为宿主布局中的 FrameLayout（高度 wrap_content）
+  <section class="card" id="bet-ui"><h2>竖屏下注弹窗：三种接入方式</h2>
+<p>竖屏内嵌时，每局下注阶段要给玩家展示「下注对象 + 筹码」的下注界面。宿主可以<strong>直接使用游戏（SDK）提供的加注卡片</strong>，也可以<strong>完全自己画</strong>；使用 SDK 卡片时，还可以把它放进宿主自己的容器里决定位置。三种方式任选其一，不需要的不用接。全屏横屏时统一由游戏内弹窗展示，与这里的选择无关。</p>
+<table><thead><tr><th>方式</th><th>宿主要做的</th><th>界面</th><th>下注提交</th><th>适合</th></tr></thead><tbody>
+<tr><td>A. SDK 默认位置</td><td>什么都不用做</td><td>SDK 加注卡片，悬浮在页面底部（左右与底部各 14dp）</td><td>SDK 处理</td><td>快速接入、没有特殊布局要求</td></tr>
+<tr><td>B. 放入宿主容器（0.6.12）</td><td>提供一个容器，调用 <code>setBetPanelContainer</code></td><td>SDK 加注卡片，位置、外边距、背景由宿主容器决定</td><td>SDK 处理</td><td>想用游戏提供的界面，但要放在页面指定位置（如聊天输入框上方）</td></tr>
+<tr><td>C. 宿主自绘</td><td>注册 <code>setBetListener</code>，自己画界面并调用 <code>submitBet</code></td><td>完全由宿主决定</td><td>宿主调用 <code>submitBet</code></td><td>要与 App 视觉完全一致，或需要埋点、二次确认等自定义交互</td></tr>
+</tbody></table>
+<ul><li>优先级：注册了 <code>setBetListener</code>（方式 C）时，方式 A / B 都不生效；未注册时，设置了容器走方式 B，否则走方式 A。</li><li>可在运行时切换：<code>setBetListener(null)</code> 回到 SDK 卡片，<code>setBetPanelContainer(null)</code> 回到默认位置。</li><li>所有接口都须在主线程调用，回调也都在主线程。</li></ul>
+<h3>方式 A：SDK 默认位置</h3><p>不调用任何下注相关接口即可。下注阶段 SDK 卡片自动出现在页面底部，玩家点筹码即提交，下注成功或截止后自动收起。卡片会盖住页面底部的宿主内容，如需避让请改用方式 B。</p>
+<h3>方式 B：把 SDK 卡片放入宿主容器</h3><p>界面仍是游戏提供的加注卡片，宿主只负责「放在哪」。</p>
+<p><strong>1. 布局里预留容器</strong>：容器宽度按需要设置，高度用 <code>wrap_content</code>，不要放任何子 View；外边距、背景、圆角等都写在容器上。</p>
+<pre><code>&lt;!-- 示例：放在聊天输入框上方 --&gt;
+&lt;FrameLayout
+    android:id="@+id/betContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="14dp"
+    app:layout_constraintBottom_toTopOf="@id/chatInput"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" /&gt;</code></pre>
+<p><strong>2. 打开游戏前后设置容器</strong>：</p>
+<pre><code>// Java
 CocosGameSDK.getInstance().setBetPanelContainer(binding.betContainer);
+CocosGameSDK.getInstance().openGame(this, binding.tableContainer, "niuniu", sessionConfig);</code></pre>
+<pre><code>// Kotlin
+CocosGameSDK.getInstance().setBetPanelContainer(binding.betContainer)
+CocosGameSDK.getInstance().openGame(this, binding.tableContainer, "niuniu", sessionConfig)</code></pre>
+<p><strong>3. 不需要时恢复默认</strong>：页面销毁时可不处理（SDK 只弱引用容器，页面销毁后自动失效）；如果同一页面要切回默认位置，调用 <code>setBetPanelContainer(null)</code>。</p>
+<p><strong>显示与收起规则</strong></p>
+<ul><li>下注阶段：卡片以 MATCH_PARENT 宽、WRAP_CONTENT 高加入容器，容器随之撑开。</li><li>点筹码提交、下注截止或离局：卡片 GONE，容器高度回到 0，下方或上方的宿主内容自动回位。</li><li>容器为空时高度为 0，不占位置；不需要宿主自己控制显隐。</li><li>切到全屏横屏时卡片收起，由游戏内弹窗接管；退出全屏后，本局未截止则重新显示。</li></ul>
+<p><strong>卡片内容</strong></p>
+<ul><li>已入座闲家：只有本座一个注区，卡片只显示「请加注筹码」与筹码按钮。</li><li>观战点头像跟注：卡片标题为「观战下注」，右侧金色标签显示「跟 昵称」，下方是筹码按钮（0.6.13）。</li><li>注区昵称过长时尾部省略。</li></ul>
+<h3>方式 C：宿主自绘下注界面</h3><p>注册 <code>GameBetListener</code> 后，竖屏不再显示 SDK 卡片，宿主根据回调数据自己画界面。</p>
+<table><thead><tr><th>回调 / 接口</th><th>时机</th><th>宿主要做的</th></tr></thead><tbody>
+<tr><td><code>onBetOptions(gameId, options)</code></td><td>本局进入下注阶段；观战点头像跟注时同一局会再次回调</td><td>展示界面，以最新一次回调为准整体刷新</td></tr>
+<tr><td><code>onBetClosed(gameId, roundId)</code></td><td>倒计时结束或离局</td><td>收起界面，之后提交会被拒绝</td></tr>
+<tr><td><code>submitBet(roundId, areaCode, amountCent, clientBetNo)</code></td><td>玩家选好注区与筹码</td><td>返回 false 表示未发出（已截止、游戏未打开或幂等号重复）</td></tr>
+<tr><td><code>onBetResult(gameId, result)</code></td><td>提交结果返回</td><td>按 <code>clientBetNo</code> 对应提交，展示成功或 <code>getErrorMessage()</code></td></tr>
+</tbody></table>
+<p><code>GameBetOptions</code> 字段：<code>getRoundId()</code> 局号、<code>getCountdownSeconds()</code> 剩余秒数、<code>getDeadlineMillis()</code> 截止时间戳、<code>getAreas()</code> 注区列表（<code>getAreaCode()</code> 提交用编码、<code>getAreaName()</code> 展示名，跟注时为玩家昵称、押庄为「庄 · 昵称」）、<code>getChipsCent()</code> 筹码（单位分）。<code>GameBetResult</code> 字段：<code>getRoundId()</code>、<code>getAreaCode()</code>、<code>getAmountCent()</code>、<code>getClientBetNo()</code>、<code>isSuccess()</code>、<code>getBalanceCent()</code>（可能为 null）、<code>getErrorMessage()</code>。</p>
+<pre><code>// Java：完整的宿主自绘流程
+CocosGameSDK.getInstance().setBetListener(new GameBetListener() {
+    @Override
+    public void onBetOptions(String gameId, GameBetOptions options) {
+        // 注区只有一个时可直接默认选中；倒计时用 getDeadlineMillis() 计算，避免累积误差
+        betPanel.show(options);
+    }
 
-// 恢复 SDK 默认位置
-CocosGameSDK.getInstance().setBetPanelContainer(null);</code></pre><pre><code>// Kotlin
-CocosGameSDK.getInstance().setBetPanelContainer(binding.betContainer)</code></pre><h3>Java</h3><pre><code>CocosGameSDK.getInstance().setBetListener(new GameBetListener() {
+    @Override
+    public void onBetClosed(String gameId, String roundId) {
+        betPanel.close(roundId);
+    }
+
+    @Override
+    public void onBetResult(String gameId, GameBetResult result) {
+        betPanel.showResult(result);
+    }
+});
+
+// 玩家点筹码时提交
+boolean isSent = CocosGameSDK.getInstance().submitBet(
+    options.getRoundId(), area.getAreaCode(), chipCent, CocosGameSDK.createClientBetNo());
+if (!isSent) betPanel.showClosed();</code></pre>
+<pre><code>// Kotlin
+CocosGameSDK.getInstance().setBetListener(object : GameBetListener {
+    override fun onBetOptions(gameId: String, options: GameBetOptions) = betPanel.show(options)
+    override fun onBetClosed(gameId: String, roundId: String) = betPanel.close(roundId)
+    override fun onBetResult(gameId: String, result: GameBetResult) = betPanel.showResult(result)
+})</code></pre>
+<ul><li><code>clientBetNo</code> 为幂等号（不超过 64 个字符），网络失败重试时沿用原幂等号；结果返回前或成功后重复提交会被忽略。</li><li>页面销毁时调用 <code>setBetListener(null)</code>，避免持有 Activity。</li><li>完整示例见 Demo 源码 <code>DemoHostBetPanel</code>。</li></ul>
+<h3>常见问题</h3><ul><li><strong>设置了容器但卡片仍在页面底部？</strong> 检查是否注册了 <code>setBetListener</code>（方式 C 优先），以及是否在主线程调用、容器是否已加入当前页面。</li><li><strong>容器空的时候留了一块空白？</strong> 容器高度须为 <code>wrap_content</code>，且不要设置最小高度或 padding（padding 请写在外层）。</li><li><strong>观战时会自动弹出吗？</strong> 不会。未入座观战时只有在下注阶段点击在桌用户头像才会弹出（竖屏、全屏一致）。</li><li><strong>记录与规则、退出确认也能自己画吗？</strong> 可以，见下方「竖屏界面由宿主实现」，与下注相互独立，可分别选择。</li></ul>
+</section>
+  <section class="card" id="host-ui"><h2>竖屏界面由宿主实现</h2><p>竖屏下的下注、记录与规则、退出确认都可以由宿主自绘；注册对应监听后竖屏 SDK 不再展示这些界面，全屏仍由 SDK 展示。未注册的监听仍使用 SDK 自带界面。独立游戏页与嵌入模式均适用。</p><table><thead><tr><th>界面</th><th>监听</th><th>宿主调用</th></tr></thead><tbody><tr><td>下注</td><td><code>setBetListener</code>：<code>onBetOptions</code>（注区、筹码、截止时间）、<code>onBetClosed</code>、<code>onBetResult</code></td><td><code>submitBet(roundId, areaCode, amountCent, clientBetNo)</code></td></tr><tr><td>记录与规则</td><td><code>setRecordsListener</code>：<code>onShowRecords</code>、<code>onRecordsUpdated</code></td><td><code>queryRecords(isHistory, filterKey, periodIndex, keyword)</code>、<code>loadMoreRecords(isHistory)</code>、<code>refreshRecords(isHistory)</code>（0.6.7）</td></tr><tr><td>退出确认</td><td><code>setExitListener</code>：<code>onExitRequested</code></td><td><code>GameExitDecision.leave()</code> / <code>stay()</code></td></tr></tbody></table><ul><li><code>submitBet</code> 须在主线程调用；<code>clientBetNo</code> 为幂等号（不超过 64 个字符，可用 <code>CocosGameSDK.createClientBetNo()</code> 生成），同一幂等号在结果返回前或成功后再次提交会被忽略，失败后可用原幂等号重试；本局已截止、游戏未打开或幂等号重复时返回 false。</li><li>记录查询：<code>isHistory</code> 为 false 查本桌当前记录，<code>filterKey</code> 取 <code>records.filters[].key</code>（全部为 <code>all</code>）；为 true 查历史场次，<code>periodIndex</code> 取周期下标，<code>keyword</code> 为局号或桌号。</li><li>退出确认必须调用 <code>leave()</code> 或 <code>stay()</code> 之一，只有第一次生效；游戏只允许在两局之间离座。</li><li>示例见 Demo 源码 <code>DemoHostBetPanel</code>、<code>DemoHostRecordsSheet</code>、<code>DemoBottomContentProvider</code>。</li></ul><p class="note">下注界面三种接入方式（SDK 默认位置、放入宿主容器、宿主自绘）的完整说明见 <a href="#bet-ui">竖屏下注弹窗</a>。</p><h3>Java</h3><pre><code>CocosGameSDK.getInstance().setBetListener(new GameBetListener() {
     @Override
     public void onBetOptions(String gameId, GameBetOptions options) {
         // 展示注区、筹码，按 options.getDeadlineMillis() 倒计时
